@@ -1,0 +1,43 @@
+; Copyright (c) uib gmbh (www.uib.de)
+; This sourcecode is owned by uib gmbh
+; and published under the Terms of the General Public License.
+; credits: http://www.opsi.org/credits/
+
+; Parameter: $SearchPattern$: Suchbegriff in Registry
+Set $SearchPattern$ = $PrettyName$
+; Obwohl es ein 64-bit Programm ist, trägt es sich in der Registry unter der WOW3264Node ein, also im 32-bit Teil
+Sub_search_registry32_uninstall_keys
+; Rückgabewert: $ResultList$ gefundene Einträge
+
+if (count ($ResultList$) = "0")
+	comment "No installations of " + $SearchPattern$ + " found in registry"
+else
+	Message "Uninstalling " + $PrettyName$ + " ..."
+	comment "Found at least one installation of " + $SearchPattern$ + " in registry, try to deinstall"
+	
+	Set $RegId$ = takeString(0, $ResultList$)
+	Set $UninstallProgram$ = GetRegistryStringValue32("[" + $RegPathUninstall$ + "\" + $RegId$ + "] UninstallString")
+	Set $InstallDir$ = ExtractFilePath($UninstallProgram$)
+	
+	Winbatch_uninstall
+	sub_check_exitcode
+	
+	comment "include custom post install file"
+	set $CustomPostDeinstall$ = getProductProperty("custom-post-deinstall","none")
+	if not ($CustomPostDeinstall$ = "none")
+		if FileExists("%ScriptPath%\custom\" + $CustomPostDeinstall$)
+			include_insert "%ScriptPath%\custom\" + $CustomPostDeinstall$
+		endif
+	endif
+	; löscht vielleicht vorhandene Überbleibsel des Programmes
+	if FileExists($InstallDir$)
+		Files_uninstall
+	endif	
+endif
+
+[Winbatch_uninstall]
+	"$UninstallProgram$" /S
+
+[Files_uninstall]
+	delete -csf $InstallDir$
+

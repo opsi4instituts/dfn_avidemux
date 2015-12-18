@@ -1,0 +1,75 @@
+; Copyright (c) uib gmbh (www.uib.de)
+; This sourcecode is owned by uib
+; and published under the Terms of the General Public License.
+; credits: http://www.opsi.org/credits/
+
+[Actions]
+; common Values for (un)installation
+include_insert "common.opsiinc"
+
+if not(HasMinimumSpace ("%SystemDrive%", $MinimumSpace$))
+	LogError "Not enough space on %SystemDrive%, " + $MinimumSpace$ + " on drive %SystemDrive% needed for " + $ProductId$
+	isFatalError
+	; Stop process and set installation status to failed
+else
+	comment "Show product picture"
+	ShowBitmap "%ScriptPath%\" + $PrettyName$ + ".png" $PrettyName$
+	
+	if FileExists("%ScriptPath%\delsub64.opsiscript")
+		comment "Start uninstall sub section"
+		Sub "%ScriptPath%\delsub64.opsiscript"
+	endif
+
+	Message "Installing %installingProdName% (%installingProdVersion%) 64 Bit..."
+	
+	set $InstFile$ = "%ScriptPath%\" + $InstFile$
+	Winbatch_install
+	
+	Set  $ExitCode$ = getLastExitCode
+	;der Exitcode 1223 wird gesetzt, obwohl die Installation richtig durchläuft
+	if not($ExitCode$ = "1223")
+		sub_check_exitcode
+	endif
+	
+	comment "Test for installation success"
+	
+	; Parameter: $SearchPattern$: Suchbegriff in Registry
+	Set $SearchPattern$ = $PrettyName$
+	; Obwohl es ein 64-bit Programm ist, trägt es sich in der Registry unter der WOW3264Node ein, also im 32-bit Teil
+	Sub_search_registry32_uninstall_keys
+	; Rückgabewert: $ResultList$ gefundene Einträge
+	if ( count ($ResultList$) = "0" )
+		logError "Fatal: After Installation " + $PrettyName$ + " could not be found in " + $RegPathUninstall$
+		isFatalError
+	else
+		Set $RegId$ = takeString(0, $ResultList$)
+		comment "Get 'InstallLocation' from registry for path to exe"
+		;hier wird UninstallProgam als Hilfsvariable benutzt, um den Pfad herauszufinden
+		Set $UninstallProgram$ = GetRegistryStringValue32("[" + $RegPathUninstall$ + "\" + $RegId$ + "] UninstallString")
+		;Der Name, den auch das Desktop Icon verwendet
+		Set $RegDisplayName$ = GetRegistryStringValue32("[" + $RegPathUninstall$ + "\" + $RegId$ + "] DisplayName")
+		Set $InstallDir$ = ExtractFilePath($UninstallProgram$)
+		Set $PathToExe$ = $InstallDir$ + $Exe$
+		set $DesktopIcon$ = getProductProperty("desktopicon","no")
+		if $DesktopIcon$ = "no"
+			comment "delete created desktop icon"
+			Linkfolder_delete_desktopicon
+		endif
+		comment "include custom post install file"
+		set $CustomPostInstall$ = getProductProperty("custom-post-install","none")
+		if not ($CustomPostInstall$ = "none")
+			if FileExists("%ScriptPath%\custom\" + $CustomPostInstall$)
+				include_insert "%ScriptPath%\custom\" + $CustomPostInstall$	
+			endif
+		endif
+	endif	
+endif
+
+[Winbatch_install]
+	$InstFile$ /S
+
+[Linkfolder_delete_desktopicon]
+	set_basefolder common_desktopdirectory
+	set_subfolder ""
+	delete_element $RegDisplayName$
+
