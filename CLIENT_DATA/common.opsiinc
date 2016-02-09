@@ -38,7 +38,7 @@ Set $ProductId$		= "avidemux"
 Set $PrettyName$        = "Avidemux"
 Set $MinimumSpace$	= "55 MB"
 Set $RegPathUninstall$	= "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
-Set $InstFile$	        = "avidemux_2.6.10_win64.exe"
+Set $InstFile$	        = "avidemux_2.6.11_win64.exe"
 Set $Exe$         = "avidemux.exe"
 ; ----------------------------------------------------------------
 
