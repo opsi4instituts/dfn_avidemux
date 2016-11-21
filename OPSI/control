@@ -9,7 +9,7 @@ id: dfn_avidemux
 name: Avidemux
 description: Eine freie, plattformunabhängige Videoschnittsoftware, die zahlreiche Audio-, Video- sowie Containerformate unterstützt.
 advice: 
-version: 2.6.14
+version: 2.6.15
 priority: 0
 licenseRequired: False
 productClasses: 
@@ -49,6 +49,10 @@ values: ["none", "post-deinstall.opsiinc"]
 default: ["none"]
 
 [Changelog]
+dfn_avidemux (2.6.15-1)
+	* Neue Upstreamversioin
+-- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 21.11.2016
+
 dfn_avidemux (2.6.14-1)
 	* Neue Upstreamversioin
 -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 19.09.2016
