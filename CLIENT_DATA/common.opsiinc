@@ -52,6 +52,6 @@ if not ($INST_SystemType$ = "64 Bit System")
 	LogError "There is no 32 bit version included in this packet!"
 	isFatalError
 endif
-if not ($INST_SystemType$ = "64 Bit System")
-	Logwarning "Only tested with 64 bit version! Please report to the maintainer successful installation on other windows versions."
+if not ($MSVersion$ = "6.1" OR $MSVersion$ = "10.0")
+	Logwarning "Only tested with windows 7 and 10! Please report to the maintainer successful installation on other windows versions."		
 endif
