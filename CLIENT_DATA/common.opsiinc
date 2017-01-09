@@ -44,12 +44,13 @@ Set $InstFile$	        = "avidemux_" + $ProductVersion$ + "_win64.exe"
 Set $Exe$         = "avidemux.exe"
 ; ----------------------------------------------------------------
 
-include_append "check_msi_exitcode.opsiinc"
+include_append "section_sub_check_exitcode.opsiinc"
 ; Obwohl es ein 64-bit Programm ist, trägt es sich in der Registry unter der WOW3264Node ein, also im 32-bit Teil
 include_append "section_sub_search_registry32_uninstall_keys.opsiinc"
 
-if not ($MSVersion$ = "6.1" OR $MSVersion$ = "10.0")
-	Logwarning "Only tested with windows 7 and 10! Please report to the maintainer successful installation on other windows versions."		
+if not ($INST_SystemType$ = "64 Bit System")
+	LogError "There is no 32 bit version included in this packet!"
+	isFatalError
 endif
 if not ($INST_SystemType$ = "64 Bit System")
 	Logwarning "Only tested with 64 bit version! Please report to the maintainer successful installation on other windows versions."
