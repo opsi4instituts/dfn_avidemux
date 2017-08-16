@@ -1,27 +1,23 @@
-; Copyright (c) uib gmbh (www.uib.de)
-; This sourcecode is owned by uib
-; and published under the Terms of the General Public License.
-; credits: http://www.opsi.org/credits/
 requiredWinstVersion >= "4.11.4.3"
 
 DefVar $RegPathUninstall$
 DefVar $InstFile$
 DefVar $LogDir$
 DefVar $ProductId$
+DefVar $ProductName$
 DefVar $ProductVersion$
 DefVar $MinimumSpace$
 DefVar $InstallDir$
 DefVar $ExitCode$
 DefVar $CustomPostInstall$
 DefVar $CustomPostDeinstall$
-DefVar $DesktopIcon$
+DefVar $DesktopLink$
 DefVar $SearchPattern$
 DefVar $RegId$
 DefVar $PathToExe$
 DefVar $Exe$
 DefVar $UninstallProgram$
 DefVar $RegDisplayName$
-DefVar $PrettyName$
 DefVar $INST_SystemType$
 DefVar $MSVersion$
 DefVar $ErrorMsg$
@@ -31,13 +27,13 @@ Set $LogDir$ = "%opsiLogDir%"
 
 Set $INST_SystemType$ = GetSystemType
 Set $MSVersion$	 = GetMsVersionInfo
-Set $ProductVersion$	= strPart("%installingProdVersion%", "1", calculate(strPos("%installingProdVersion%","-") + "-" + "1" ))
+Set $ProductVersion$	= takestring (0, splitString("%installingProdVersion%", "-"))
 
 ; ----------------------------------------------------------------
 ; - Please edit the following values                             -
 ; ----------------------------------------------------------------
 Set $ProductId$		= "avidemux"
-Set $PrettyName$        = "Avidemux"
+Set $ProductName$        = "Avidemux"
 Set $MinimumSpace$	= "55 MB"
 Set $RegPathUninstall$	= "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
 Set $InstFile$	        = "avidemux_" + $ProductVersion$ + "_win64.exe"
@@ -54,4 +50,13 @@ if not ($INST_SystemType$ = "64 Bit System")
 endif
 if not ($MSVersion$ = "6.1" OR $MSVersion$ = "10.0")
 	Logwarning "Only tested with windows 7 and 10! Please report to the maintainer successful installation on other windows versions."		
+endif
+
+comment "Show product picture"
+if (FileExists("%ScriptPath%\..\lib\icons\%installingProdName%.png"))
+       comment "logo at local library/icons found."
+       ShowBitmap "%ScriptPath%\..\lib\icons\%installingProdName%.png" $ProductName$
+else
+       comment "no logo at local library/icons, use from ScriptPath ..."
+       ShowBitmap "%ScriptPath%\o4i.png" $ProductName$
 endif
