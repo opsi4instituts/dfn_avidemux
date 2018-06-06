@@ -1,21 +1,29 @@
-; Parameter: $SearchPattern$: Suchbegriff in Registry
-Set $SearchPattern$ = $ProductName$
-; Obwohl es ein 64-bit Programm ist, trägt es sich in der Registry unter der WOW3264Node ein, also im 32-bit Teil
-Sub_search_registry32_uninstall_keys
-; Rückgabewert: $ResultList$ gefundene Einträge
+; Ergebnis ist StringList (mehrere Einträge möglich);
+; in einer Zeile werden drei Ergebnisse mit "|" abgetrennt geliefert: Registrykey (mit Pfad) | Bereich Registry (kann direkt getRegistryValue übergeben werden | DisplayName
+; z.B. HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\Test64|64bit|Test Registry Entry64
+Set $ResultList$ = SearchRegistryUninstallKeys($ProductId$)
 
 if (count ($ResultList$) = "0")
-	comment "No installations of " + $SearchPattern$ + " found in registry"
+	comment "No installations of " + $ProductName$ + " found in registry"
 else
 	Message "Uninstalling " + $ProductName$ + " ..."
-	comment "Found at least one installation of " + $SearchPattern$ + " in registry, try to deinstall"
-	
-	Set $RegId$ = takeString(0, $ResultList$)
-	Set $UninstallProgram$ = GetRegistryStringValue32("[" + $RegPathUninstall$ + "\" + $RegId$ + "] UninstallString")
+	comment "Found at least one installation of " + $ProductName$ + " in registry, try to deinstall"
+
+	Set $RegId$ = takeString (0,splitString(takeString(0,$ResultList$), '|'))
+	Set $RegBitScope$ = takeString (1,splitString(takeString(0,$ResultList$), '|'))
+
+	Set $UninstallProgram$ = GetRegistryValue($RegId$, "UninstallString", $RegBitScope$)
+	if not (FileExists($UninstallProgram$))
+		LogError "Suspicious! Found entry of installer in Registry, but $UninstallProgramm$ does not exist!?"
+		isFatalError
+	endif
 	Set $InstallDir$ = ExtractFilePath($UninstallProgram$)
 	
 	Winbatch_uninstall
-	sub_check_exitcode
+	Set $ExitCode$ = getLastExitCode
+	if stringToBool(isNSISExitcodeFatal($ExitCode$, "True", $ErrorString$))
+        isFatalError
+    endif
 	
 	comment "include custom post install file"
 	set $CustomPostDeinstall$ = getProductProperty("custom-post-deinstall","none")

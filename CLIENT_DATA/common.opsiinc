@@ -1,26 +1,26 @@
-requiredWinstVersion >= "4.11.4.3"
+requiredWinstVersion >= "4.12.0.16"
 
-DefVar $RegPathUninstall$
 DefVar $InstFile$
 DefVar $LogDir$
 DefVar $ProductId$
 DefVar $ProductName$
 DefVar $ProductVersion$
+DefVar $InstalledVersion$
 DefVar $MinimumSpace$
 DefVar $InstallDir$
 DefVar $ExitCode$
+DefVar $ErrorString$
 DefVar $CustomPostInstall$
 DefVar $CustomPostDeinstall$
 DefVar $DesktopLink$
-DefVar $SearchPattern$
 DefVar $RegId$
+DefVar $RegBitScope$
+DefVar $RegDisplayName$
 DefVar $PathToExe$
 DefVar $Exe$
 DefVar $UninstallProgram$
-DefVar $RegDisplayName$
 DefVar $INST_SystemType$
 DefVar $MSVersion$
-DefVar $ErrorMsg$
 DefStringlist $ResultList$
 
 Set $LogDir$ = "%opsiLogDir%"
@@ -35,22 +35,21 @@ Set $ProductVersion$	= takestring (0, splitString("%installingProdVersion%", "-"
 Set $ProductId$		= "avidemux"
 Set $ProductName$        = "Avidemux"
 Set $MinimumSpace$	= "55 MB"
-Set $RegPathUninstall$	= "HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
 Set $InstFile$	        = "avidemux_" + $ProductVersion$ + "_win64.exe"
 Set $Exe$         = "avidemux.exe"
 ; ----------------------------------------------------------------
 
-include_append "section_sub_check_exitcode.opsiinc"
-; Obwohl es ein 64-bit Programm ist, trägt es sich in der Registry unter der WOW3264Node ein, also im 32-bit Teil
-include_append "section_sub_search_registry32_uninstall_keys.opsiinc"
+; exitcode library von UIB (siehe C:\program files(x86)\opsi.org\opsi-client-agent\opsi-winst\lib) mit 'local functions'
+importLib "uib_exitcode.opsiscript::isNsisExitcodeFatal"
+; Library registry search uninstall keys (local functions)
+importLib "func_search_registry_uninstall_keys.opsiinc"
 
 if not ($INST_SystemType$ = "64 Bit System")
-	LogError "There is no 32 bit version included in this packet!"
+	LogError "There is no 32 bit version included in this package."
 	isFatalError
 endif
-if not ($MSVersion$ = "6.1" OR $MSVersion$ = "10.0")
-	Logwarning "Only tested with windows 7 and 10! Please report to the maintainer successful installation on other windows versions."		
-endif
+if not ($MSVersion$ = "10.0")
+	Logwarning "Only tested with 10! Please report to the maintainer successful installation on other windows versions."
 
 comment "Show product picture"
 if (FileExists("%ScriptPath%\..\lib\icons\%installingProdName%.png"))
