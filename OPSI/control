@@ -1,5 +1,5 @@
 [Package]
-version: 1
+version: 2
 depends: 
 
 [Product]
@@ -45,6 +45,10 @@ values: ["none", "post-deinstall.opsiinc"]
 default: ["none"]
 
 [Changelog]
+dfn_avidemux (2.7.1-2)
+	* Fix banaler Fehler
+ -- Thomas Besser (archIT/KIT) <thomas.besser@kit.edu>, 14.06.2018
+
 dfn_avidemux (2.7.1-1)
 	* Neue Upstreamversion
 	* neue Regsuche (local function, universell 32/64, benötigt opsi-winst 4.12.0.16)
